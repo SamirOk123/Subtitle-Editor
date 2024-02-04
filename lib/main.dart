@@ -33,7 +33,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: customSwatch,
         scaffoldBackgroundColor: kSecondaryColor,
-        appBarTheme: const AppBarTheme(backgroundColor: kPrimaryColor),
+        appBarTheme: const AppBarTheme(centerTitle: true),
+        fontFamily: 'Malayalam',
         useMaterial3: false,
       ),
       debugShowCheckedModeBanner: false,

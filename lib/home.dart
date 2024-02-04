@@ -19,22 +19,45 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
-  Future<void> _pickSRTFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
+ Future<void> _pickSRTFile() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(
+    type: FileType.any,
+  );
 
-    if (result != null && result.files.isNotEmpty) {
-      File file = File(result.files.single.path!);
+  if (result != null && result.files.isNotEmpty) {
+    File file = File(result.files.single.path!);
+
+    // Check if the file has an SRT extension
+    if (file.path.endsWith('.srt.txt')) {
       String content = await file.readAsString();
       _splitText(content);
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  SubtitleEditor(texts: List.from(_resultTexts))));
+        context,
+        MaterialPageRoute(
+          builder: (context) => SubtitleEditor(texts: List.from(_resultTexts)),
+        ),
+      );
+    } else {
+     
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Invalid File Type'),
+          content: Text('Please pick an SRT file.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
