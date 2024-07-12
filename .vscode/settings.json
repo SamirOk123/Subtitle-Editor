@@ -1,3 +1,130 @@
 {
-    "editor.fontSize": 13
+    "workbench.iconTheme": "material-icon-theme",
+    "files.exclude": {
+        "**/*.freezed.dart": false,
+        "**/*.g.dart": false,
+        "**/.gitkeep": false
+    },
+    "workbench.colorCustomizations": {
+        "[Community Material Theme Darker]": {
+            "statusBar.debuggingBackground": "#212121"
+        },
+        "[Community Material Theme]": {
+            "statusBar.debuggingBackground": "#263238"
+        },
+        "[Material Theme Palenight]": {
+            "statusBar.debuggingBackground": "#292D3E"
+        }
+    },
+    "material-icon-theme.folders.associations": {
+        "global_state": "global",
+        "ui": "layout",
+        "presentation": "layout",
+        "widgets": "components",
+        "bloc": "ngrx-store",
+        "application": "ngrx-store",
+        "state": "ngrx-store",
+        "infrastructure": "database",
+        "fixtures": "config",
+        "domain": "rules",
+        "device": "client",
+        "entities": "class",
+        "features": "other",
+        "fp": "functions",
+        "routing": "routes",
+        "injection": "custom",
+        "l10n": "i18n"
+    },
+    "material-icon-theme.files.associations": {
+        "*.moor": "database"
+    },
+    "files.associations": {
+        "*.moor": "sqlite"
+    },
+    "cSpell.enableFiletypes": [
+        "asciidoc",
+        "c",
+        "cpp",
+        "csharp",
+        "css",
+        "dart",
+        "go",
+        "handlebars",
+        "html",
+        "jade",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "latex",
+        "less",
+        "markdown",
+        "php",
+        "plaintext",
+        "pub",
+        "python",
+        "restructuredtext",
+        "rust",
+        "scss",
+        "text",
+        "typescript",
+        "typescriptreact",
+        "yml"
+    ],
+    "dart.flutterCreateAndroidLanguage": "kotlin",
+    "dart.flutterCreateIOSLanguage": "swift",
+    "files.insertFinalNewline": true,
+    "breadcrumbs.enabled": true,
+    "editor.renderControlCharacters": false,
+    "files.autoSave": "off",
+    "editor.suggestSelection": "first",
+    "editor.fontFamily": "JetBrains Mono",
+    "editor.cursorBlinking": "solid",
+    "material-icon-theme.folders.theme": "specific",
+    "material-icon-theme.activeIconPack": "nest",
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "extensions.autoUpdate": true,
+    "editor.fontLigatures": true,
+    "cSpell.diagnosticLevel": "Hint",
+    "debug.console.fontFamily": "JetBrains Mono",
+    "dart.previewFlutterOutline": true,
+    "material-icon-theme.folders.color": "#2e7d32",
+    "explorer.confirmDelete": false,
+    "todo-tree.highlights.enabled": false,
+    "explorer.confirmDragAndDrop": false,
+    "dart.previewFlutterGutterIcons": true,
+    "dart.debugExternalLibraries": true,
+    "dart.enableMachineLearningCodeCompletion": true,
+    "dart.previewBuildRunnerTasks": true,
+    "dart_data_class_generator.constructor.required": true,
+    "dart_data_class_generator.constructor.default_values": false,
+    "dart_data_class_generator.hashCode.use_jenkins": false,
+    "dart.debugSdkLibraries": false,
+    "dart.additionalAnalyzerFileExtensions": [
+        "moor"
+    ],
+    "explorer.compactFolders": false,
+    "editor.formatOnSave": true,
+    "terminal.integrated.fontWeight": "500",
+    "editor.fontWeight": "500",
+    "dart.showIgnoreQuickFixes": true,
+    "workbench.colorTheme": "Material Theme",
+    "extensions.ignoreRecommendations": false,
+    "todo-tree.tree.showScanModeButton": false,
+    "dart.warnWhenEditingFilesOutsideWorkspace": false,
+    "dart.previewFlutterUiGuides": true,
+    "dart.previewFlutterUiGuidesCustomTracking": true,
+    "dart.previewUpdateImportsOnRename": true,
+    "pubspec-assist.sortDependencies": false,
+    "workbench.startupEditor": "none",
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]",
+        "[x]"
+    ],
+    "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)",
 }

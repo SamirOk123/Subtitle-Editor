@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:subtitle_editor/constants.dart';
 import 'package:subtitle_editor/home.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
+  await Hive.openBox<String>('subtitles');
   runApp(const MyApp());
 }
 
@@ -29,7 +32,7 @@ class MyApp extends StatelessWidget {
       },
     );
     return MaterialApp(
-      home: const HomeScreen(),
+      home: VideoSubtitlePlayer(),
       theme: ThemeData(
         primarySwatch: customSwatch,
         scaffoldBackgroundColor: kSecondaryColor,

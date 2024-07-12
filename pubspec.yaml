@@ -1,41 +1,38 @@
 name: subtitle_editor
 description: "A new Flutter project."
 
-publish_to: 'none' 
-
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.3 <4.0.0'
+  sdk: ">=3.2.3 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-
-  
   cupertino_icons: ^1.0.2
   file_picker: ^6.1.1
   path_provider: ^2.0.15
-
+  hive: ^2.0.4
+  hive_flutter: ^1.1.0
+  path: ^1.8.0
+  video_player: ^2.2.19
+  flutter_ffmpeg: ^0.4.0
+  flutter_vlc_player: ^7.4.2
+  html: ^0.15.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  
   flutter_lints: ^2.0.0
 
-
 flutter:
-
-
   uses-material-design: true
 
- 
   fonts:
     - family: Malayalam
       fonts:
         - asset: assets/NotoSerifMalayalam-Regular.ttf
-  
