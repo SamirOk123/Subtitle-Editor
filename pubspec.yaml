@@ -22,6 +22,7 @@ dependencies:
   flutter_ffmpeg: ^0.4.0
   flutter_vlc_player: ^7.4.2
   html: ^0.15.4
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:
@@ -36,3 +37,6 @@ flutter:
     - family: Malayalam
       fonts:
         - asset: assets/NotoSerifMalayalam-Regular.ttf
+    - family: English
+      fonts:
+        - asset: assets/Inter-Regular.ttf

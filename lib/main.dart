@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:subtitle_editor/constants.dart';
-import 'package:subtitle_editor/home.dart';
+import 'package:subtitle_editor/splash_screen.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -31,16 +32,26 @@ class MyApp extends StatelessWidget {
         900: customColor,
       },
     );
-    return MaterialApp(
-      home: VideoSubtitlePlayer(),
-      theme: ThemeData(
-        primarySwatch: customSwatch,
-        scaffoldBackgroundColor: kSecondaryColor,
-        appBarTheme: const AppBarTheme(centerTitle: true),
-        fontFamily: 'Malayalam',
-        useMaterial3: false,
-      ),
-      debugShowCheckedModeBanner: false,
+    return ScreenUtilInit(
+      designSize: const Size(393, 852),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, child) {
+        return MaterialApp(
+          home: const SplashScreen(),
+          theme: ThemeData(
+            primarySwatch: customSwatch,
+            // scaffoldBackgroundColor: kSecondaryColor,
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+              elevation: 0,
+            ),
+            fontFamily: 'English',
+            useMaterial3: false,
+          ),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
