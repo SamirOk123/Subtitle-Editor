@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as dom;
@@ -140,7 +141,7 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return CupertinoAlertDialog(
           title: const Text('Jump to line'),
           content: StatefulBuilder(
             builder: (context, setState) {
@@ -154,7 +155,7 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Slider(
+                  CupertinoSlider(
                     value: selectedIndex.toDouble(),
                     min: 1,
                     max: (_subtitles.length).toDouble(),
