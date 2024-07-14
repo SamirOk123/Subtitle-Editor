@@ -23,6 +23,7 @@ dependencies:
   flutter_vlc_player: ^7.4.2
   html: ^0.15.4
   flutter_screenutil: ^5.9.3
+  scrollable_positioned_list: ^0.3.8
 
 dev_dependencies:
   flutter_test:

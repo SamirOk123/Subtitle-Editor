@@ -5,6 +5,7 @@ import 'package:html/dom.dart' as dom;
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:subtitle_editor/constants.dart';
 import 'package:subtitle_editor/subtitle.dart';
 
@@ -24,7 +25,11 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
   List<Subtitle> _subtitles = [];
 
   //Scrolling
-  ScrollController _scrollController = ScrollController();
+  // ScrollController _scrollController = ScrollController();
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+
   bool _showScrollToTopButton = false;
 
   Future<void> _pickVideo() async {
@@ -109,7 +114,7 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
 
       String text = '';
       while (i < lines.length && lines[i].trim().isNotEmpty) {
-        text += "${lines[i].trim()}?  \n";
+        text += "${lines[i].trim()}  \n";
         i++;
       }
 
@@ -130,23 +135,29 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
       return;
     }
 
-    int selectedIndex = 0; // Default to the first index
+    int selectedIndex = 1; // Default to the first index
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Select Index'),
+          title: const Text('Jump to line'),
           content: StatefulBuilder(
             builder: (context, setState) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Select Index: $selectedIndex'),
+                  Text(
+                    selectedIndex.toString(),
+                    style: TextStyle(
+                      fontSize: 50.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   Slider(
                     value: selectedIndex.toDouble(),
-                    min: 0,
-                    max: (_subtitles.length - 1).toDouble(),
+                    min: 1,
+                    max: (_subtitles.length).toDouble(),
                     divisions: _subtitles.length,
                     onChanged: (value) {
                       setState(() {
@@ -168,8 +179,12 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
             TextButton(
               onPressed: () {
                 // Assuming _subtitles[selectedIndex] is the target subtitle text
-                String targetSubtitleText = _subtitles[selectedIndex].text;
-                _scrollToItem(targetSubtitleText);
+                // String targetSubtitleText = _subtitles[selectedIndex].text;
+
+                _itemScrollController.scrollTo(
+                    index: selectedIndex - 1,
+                    curve: Curves.fastOutSlowIn,
+                    duration: const Duration(seconds: 1));
                 Navigator.of(context).pop();
               },
               child: const Text('OK'),
@@ -180,55 +195,33 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
     );
   }
 
-  void _scrollToItem(String subtitleText) {
-    // Find the index of the item with matching text
-    int index =
-        _subtitles.indexWhere((subtitle) => subtitle.text == subtitleText);
-    if (index != -1) {
-      double offset = 0.0;
-
-      // Accumulate heights of preceding items
-      for (int i = 0; i < index; i++) {
-        // Replace this with your actual item height calculation logic
-        double itemHeight = 103; // Example: Replace with actual calculation
-        offset += itemHeight;
-      }
-
-      // Animate scroll to the calculated offset
-      _scrollController.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.offset >= 200) {
-        if (!_showScrollToTopButton) {
-          setState(() {
-            _showScrollToTopButton = true;
-          });
-        }
-      } else {
-        if (_showScrollToTopButton) {
-          setState(() {
-            _showScrollToTopButton = false;
-          });
-          print('Hide scroll-to-top button');
-        }
-      }
-    });
+    _itemPositionsListener.itemPositions.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    // Check if the user has scrolled down
+    final firstVisibleIndex =
+        _itemPositionsListener.itemPositions.value.first.index;
+    if (firstVisibleIndex > 5 && !_showScrollToTopButton) {
+      setState(() {
+        _showScrollToTopButton = true;
+      });
+    } else if (firstVisibleIndex <= 5 && _showScrollToTopButton) {
+      setState(() {
+        _showScrollToTopButton = false;
+      });
+    }
   }
 
   @override
   void dispose() async {
     await _vlcPlayerController?.stopRendererScanning();
     await _vlcPlayerController?.dispose();
-    _scrollController.dispose();
+    _itemPositionsListener.itemPositions.removeListener(_scrollListener);
+
     super.dispose();
   }
 
@@ -313,40 +306,59 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
               ),
             if (_subtitles.isNotEmpty) ...[
               Expanded(
-                child: Scrollbar(
-                  controller: _scrollController,
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.all(16.r),
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: _subtitles.length,
-                    itemBuilder: (context, index) {
-                      final subtitle = _subtitles[index];
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 8.h),
-                        padding: EdgeInsets.all(8.r),
-                        decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8.r),
+                child: ScrollablePositionedList.builder(
+                  // scrollOffsetListener: _scrollOffsetListener,
+                  itemScrollController: _itemScrollController,
+                  itemPositionsListener: _itemPositionsListener,
+                  padding: EdgeInsets.all(16.r),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: _subtitles.length,
+                  itemBuilder: (context, index) {
+                    final subtitle = _subtitles[index];
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 8.h),
+                      padding: EdgeInsets.all(16.r),
+                      decoration: BoxDecoration(
+                        color: kPrimaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          if (_vlcPlayerController != null) {
+                            _vlcPlayerController!
+                                .seekTo(parseDuration(subtitle.startTime));
+                          }
+                          _showEditDialog(subtitle);
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              subtitle.index.toString(),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                            SizedBox(width: 16.w),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${subtitle.startTime} --> ${subtitle.endTime}",
+                                ),
+                                SizedBox(height: 8.h),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.7,
+                                  child:
+                                      RichText(text: _parseHtml(subtitle.text)),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        child: ListTile(
-                          leading: Text('${subtitle.index}'),
-                          title: Text(
-                              "${subtitle.startTime} --> ${subtitle.endTime}"),
-                          subtitle: RichText(
-                            text: _parseHtml(subtitle.text),
-                          ),
-                          onTap: () {
-                            if (_vlcPlayerController != null) {
-                              _vlcPlayerController!
-                                  .seekTo(parseDuration(subtitle.startTime));
-                            }
-                            _showEditDialog(subtitle);
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -356,11 +368,8 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
       floatingActionButton: _showScrollToTopButton
           ? FloatingActionButton(
               onPressed: () {
-                _scrollController.animateTo(
-                  0,
-                  duration: const Duration(seconds: 1),
-                  curve: Curves.easeInOut,
-                );
+                _itemScrollController.scrollTo(
+                    index: 0, duration: const Duration(seconds: 1));
               },
               child: const Icon(Icons.arrow_upward),
             )
@@ -377,46 +386,171 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Subtitle'),
           content: SingleChildScrollView(
             child: Column(
               children: [
-                TextFormField(
-                  controller: startTimeController,
-                  decoration: const InputDecoration(labelText: 'Start Time'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                        "Line: ${subtitle.index} (${calculateDuration(subtitle.startTime, subtitle.endTime)})"),
+                    GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Icon(Icons.close)),
+                  ],
                 ),
-                TextFormField(
-                  controller: endTimeController,
-                  decoration: const InputDecoration(labelText: 'End Time'),
-                ),
+                SizedBox(height: 12.h),
                 TextFormField(
                   controller: textController,
-                  decoration: const InputDecoration(labelText: 'Text'),
-                  maxLines: 3,
+                  style: TextStyle(fontSize: 12.sp),
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 12.h,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    enabledBorder:
+                        OutlineInputBorder(borderSide: BorderSide.none),
+                    filled: true,
+                    fillColor: kPrimaryColor.withOpacity(0.1),
+                  ),
+                  maxLines: 6,
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: 80.w,
+                      height: 30.h,
+                      child: TextFormField(
+                        style: TextStyle(fontSize: 9.sp, color: Colors.white),
+                        controller: startTimeController,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xff888888),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          subtitle.startTime = startTimeController.text;
+                          subtitle.endTime = endTimeController.text;
+                          subtitle.text = textController.text;
+                        });
+                        _updateSubtitles();
+                        Navigator.of(context).pop();
+                      },
+                      child: Icon(
+                        Icons.save,
+                        size: 20.sp,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 80.w,
+                      height: 30.h,
+                      child: TextFormField(
+                          style: TextStyle(fontSize: 9.sp, color: Colors.white),
+                          controller: endTimeController,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xff888888),
+                          )),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(12.r),
+                      decoration: BoxDecoration(
+                        color: kPrimaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(8.r),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.arrow_back_ios_rounded,
+                            size: 12.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 12.sp,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Container(
+                      padding: EdgeInsets.all(12.r),
+                      decoration: BoxDecoration(
+                        color: kPrimaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(8.r),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.format_bold_rounded,
+                            size: 12.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Icon(
+                            Icons.format_italic_rounded,
+                            size: 12.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Icon(
+                            Icons.palette,
+                            size: 12.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          GestureDetector(
+                            onTap: () {
+                              textController.clear();
+                            },
+                            child: Icon(
+                              Icons.clear_all_rounded,
+                              size: 12.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  subtitle.startTime = startTimeController.text;
-                  subtitle.endTime = endTimeController.text;
-                  subtitle.text = textController.text;
-                });
-                _updateSubtitles();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
         );
       },
     );
@@ -491,5 +625,41 @@ class _SubtitleEditorScreenState extends State<SubtitleEditorScreen> {
 
   Color _parseColor(String colorString) {
     return Color(int.parse(colorString.substring(1), radix: 16) + 0xFF000000);
+  }
+
+  String calculateDuration(String startTime, String endTime) {
+    // Function to parse the time string into a DateTime object
+    DateTime parseTime(String time) {
+      List<String> parts = time.split(',');
+      List<String> timeParts = parts[0].split(':');
+      int hours = int.parse(timeParts[0]);
+      int minutes = int.parse(timeParts[1]);
+      int seconds = int.parse(timeParts[2]);
+      int milliseconds = int.parse(parts[1]);
+
+      return DateTime(0, 1, 1, hours, minutes, seconds, milliseconds);
+    }
+
+    // Parse start and end times
+    DateTime startDateTime = parseTime(startTime);
+    DateTime endDateTime = parseTime(endTime);
+
+    // Calculate the duration between the two times
+    Duration duration = endDateTime.difference(startDateTime);
+
+    // Convert duration to minutes and seconds
+    int minutes = duration.inMinutes;
+    int seconds = duration.inSeconds % 60;
+
+    // Create the formatted string
+    String formattedDuration = '';
+    if (minutes > 0) {
+      formattedDuration += "${minutes} min${minutes != 1 ? 's' : ''} ";
+    }
+    if (seconds > 0) {
+      formattedDuration += "${seconds} sec${seconds != 1 ? 's' : ''}";
+    }
+
+    return formattedDuration.trim();
   }
 }

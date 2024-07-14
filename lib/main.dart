@@ -46,6 +46,13 @@ class MyApp extends StatelessWidget {
               centerTitle: true,
               elevation: 0,
             ),
+            dialogTheme: DialogTheme(
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(8.r), // Set the desired radius here
+              ),
+            ),
+
             fontFamily: 'English',
             useMaterial3: false,
           ),
